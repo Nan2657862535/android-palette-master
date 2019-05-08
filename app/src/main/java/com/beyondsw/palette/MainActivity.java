@@ -10,9 +10,12 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import java.io.File;
@@ -20,18 +23,22 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, PaletteView.Callback,Handler.Callback {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, PaletteView.Callback,Handler.Callback ,ColorPopupWindow.OnItemClickListener{
 
     private View mUndoView;
     private View mRedoView;
     private View mPenView;
     private View mEraserView;
     private View mClearView;
+    private View mshowDrawSizeSeekBar;
+
     private PaletteView mPaletteView;
     private ProgressDialog mSaveProgressDlg;
     private static final int MSG_SAVE_SUCCESS = 1;
     private static final int MSG_SAVE_FAILED = 2;
     private Handler mHandler;
+    private SeekBar DrawSizeSeekBar;
+    private boolean isDrawSizeSeekBarshowed=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,18 +48,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mPaletteView = (PaletteView) findViewById(R.id.palette);
         mPaletteView.setCallback(this);
 
+        DrawSizeSeekBar=(SeekBar)findViewById(R.id.DrawSizeSeekBar);
+        DrawSizeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                mPaletteView.setPenRawSize(i);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
         mUndoView = findViewById(R.id.undo);
         mRedoView = findViewById(R.id.redo);
         mPenView = findViewById(R.id.pen);
         mPenView.setSelected(true);
         mEraserView = findViewById(R.id.eraser);
         mClearView = findViewById(R.id.clear);
+        mshowDrawSizeSeekBar=findViewById(R.id.showDrawSizeSeekBar);
 
         mUndoView.setOnClickListener(this);
         mRedoView.setOnClickListener(this);
         mPenView.setOnClickListener(this);
         mEraserView.setOnClickListener(this);
         mClearView.setOnClickListener(this);
+        mshowDrawSizeSeekBar.setOnClickListener(this);
 
         mUndoView.setEnabled(false);
         mRedoView.setEnabled(false);
@@ -154,6 +181,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 }).start();
                 break;
+            case R.id.saveasxml:
+                if(mSaveProgressDlg==null){
+                    initSaveProgressDlg();
+                }
+                break;
         }
         return true;
     }
@@ -167,6 +199,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            case R.id.showDrawSizeSeekBar:
+                ColorPopupWindow mPop = new ColorPopupWindow(this);
+                mPop.setOnItemClickListener(this);
+                //这里就可自定义在上方和下方了 ，这种方式是为了确定在某个位置，某个控件的左边，右边，上边，下边都可以
+                //mPop.showAtLocation(v, Gravity.NO_GRAVITY, (location[0] + v.getWidth() / 2) - popupWidth / 2, location[1] - popupHeight);
+                mPop.showAtLocation(v, Gravity.NO_GRAVITY, ( v.getWidth() / 2) , 200);
+
+
+                if (!isDrawSizeSeekBarshowed){
+                    DrawSizeSeekBar.setVisibility(View.VISIBLE);
+                    isDrawSizeSeekBarshowed=true;
+                }else {
+                    DrawSizeSeekBar.setVisibility(View.GONE);
+                    isDrawSizeSeekBarshowed=false;
+                }
+                break;
             case R.id.undo:
                 mPaletteView.undo();
                 break;
@@ -188,4 +236,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
     }
+
+    @Override
+    public void setOnItemClick(View v) {
+
+        switch (v.getId()) {
+            case R.id.comment_item_linear:
+
+//                MyApp.getApp().showToast("lin");
+                break;
+
+
+        }
+    }
+
 }

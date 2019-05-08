@@ -14,6 +14,10 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.beyondsw.palette.Utils.DimenUtils;
+import com.beyondsw.palette.drawinginfo.DrawingInfo;
+import com.beyondsw.palette.drawinginfo.PathDrawingInfo;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +30,8 @@ public class PaletteView extends View {
     private Path mPath;
     private float mLastX;
     private float mLastY;
+    private float mEndX;
+    private float mEndY;
     private Bitmap mBufferBitmap;
     private Canvas mBufferCanvas;
 
@@ -96,20 +102,8 @@ public class PaletteView extends View {
         mBufferCanvas = new Canvas(mBufferBitmap);
     }
 
-    private abstract static class DrawingInfo {
-        Paint paint;
-        abstract void draw(Canvas canvas);
-    }
 
-    private static class PathDrawingInfo extends DrawingInfo{
 
-        Path path;
-
-        @Override
-        void draw(Canvas canvas) {
-            canvas.drawPath(path, paint);
-        }
-    }
 
     public Mode getMode() {
         return mMode;
@@ -127,6 +121,7 @@ public class PaletteView extends View {
             }
         }
     }
+
 
     public void setEraserSize(int size) {
         mEraserSize = size;
@@ -263,6 +258,15 @@ public class PaletteView extends View {
         if (mBufferBitmap != null) {
             canvas.drawBitmap(mBufferBitmap, 0, 0, null);
         }
+
+        //canvas.drawLine(mLastX,mLastY,mEndX,mEndY,mPaint);
+
+        /*double midpointx=(mLastX+mEndX)*0.5;
+        double midpointy=(mLastY+mEndY)*0.5;
+        double radius=0.5*Math.sqrt(Math.abs(mLastX-mEndX)*Math.abs(mLastX-mEndX)+Math.abs(mLastY-mEndY)*Math.abs(mLastY-mEndY));
+            canvas.drawCircle((float)midpointx , (float)midpointy , (float)radius,mPaint);*/
+
+        canvas.drawRect(mLastX , mLastY , mEndX , mEndY , mPaint);
     }
 
     @SuppressWarnings("all")
@@ -285,7 +289,10 @@ public class PaletteView extends View {
                 break;
             case MotionEvent.ACTION_MOVE:
                 //这里终点设为两点的中心点的目的在于使绘制的曲线更平滑，如果终点直接设置为x,y，效果和lineto是一样的,实际是折线效果
-                mPath.quadTo(mLastX, mLastY, (x + mLastX) / 2, (y + mLastY) / 2);
+
+                mEndX=x;
+                mEndY=y;
+                /*mPath.quadTo(mLastX, mLastY, (x + mLastX) / 2, (y + mLastY) / 2);
                 if (mBufferBitmap == null) {
                     initBuffer();
                 }
@@ -295,7 +302,8 @@ public class PaletteView extends View {
                 mBufferCanvas.drawPath(mPath,mPaint);
                 invalidate();
                 mLastX = x;
-                mLastY = y;
+                mLastY = y;*/
+                invalidate();
                 break;
             case MotionEvent.ACTION_UP:
                 if (mMode == Mode.DRAW || mCanEraser) {

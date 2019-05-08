@@ -3,10 +3,20 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     >
-
+    <item android:id="@+id/openfromxml" app:showAsAction="always"
+        android:icon="@drawable/ic_save"
+        android:titleCondensed="从xml文件打开"
+        android:title="从xml文件打开"
+        />
+    <item android:id="@+id/saveasxml" app:showAsAction="always"
+        android:icon="@drawable/ic_save"
+        android:titleCondensed="保存为xml"
+        android:title="保存为xml"
+        />
     <item android:id="@+id/save" app:showAsAction="always"
         android:icon="@drawable/ic_save"
           android:titleCondensed="保存图片"
           android:title="保存图片"
         />
+
 </menu>

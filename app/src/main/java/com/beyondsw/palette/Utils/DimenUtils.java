@@ -1,4 +1,4 @@
-package com.beyondsw.palette;
+package com.beyondsw.palette.Utils;
 
 import android.content.res.Resources;
 import android.util.DisplayMetrics;
