@@ -24,7 +24,13 @@ public class PullPathDrawingInfoParser {
    *    ---- 解析xml
     */
     public List<PathDrawingInfo> parse(InputStream in) throws Exception {
+/*
+* // path路径根据实际项目修改，此次获取SDcard根目录
+String path = Environment.getExternalStorageDirectory().toString();
+File xmlFlie = new File(path+fileName);
+InputStream inputStream = new FileInputStream(xmlFlie);
 
+* */
         List<PathDrawingInfo> mPathDrawingInfos = null;
         List<Point> mPoints=new ArrayList<>();
         PathDrawingInfo mPathDrawingInfo=null;
