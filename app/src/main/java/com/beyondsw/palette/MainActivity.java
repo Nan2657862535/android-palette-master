@@ -216,6 +216,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mPaletteView.redo();
                 break;
             case R.id.pen:
+                showShapePopupWindow(v);
                 v.setSelected(true);
                 mEraserView.setSelected(false);
                 mPaletteView.setMode(PaletteView.Mode.DRAW);
@@ -229,6 +230,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mPaletteView.clear();
                 break;
         }
+    }
+
+    private void showShapePopupWindow(View v) {
+
     }
 
     private void showSetupPopupWindow(View v) {
