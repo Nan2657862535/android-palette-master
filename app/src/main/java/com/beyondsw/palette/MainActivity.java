@@ -4,26 +4,33 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
+import com.beyondsw.palette.drawinginfo.PathDrawingInfo;
+import com.beyondsw.palette.popupwindow.ColorSizePopupWindow;
+import com.beyondsw.palette.xmlparser.PullPathDrawingInfoParser;
+
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, PaletteView.Callback,Handler.Callback ,ColorPopupWindow.OnItemClickListener{
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, PaletteView.Callback,Handler.Callback ,ColorSizePopupWindow.OnItemClickListener,ColorSizePopupWindow.OnSeekBarChangeListener {
 
     private View mUndoView;
     private View mRedoView;
@@ -37,7 +44,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final int MSG_SAVE_SUCCESS = 1;
     private static final int MSG_SAVE_FAILED = 2;
     private Handler mHandler;
-    private SeekBar DrawSizeSeekBar;
     private boolean isDrawSizeSeekBarshowed=false;
 
     @Override
@@ -47,24 +53,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         mPaletteView = (PaletteView) findViewById(R.id.palette);
         mPaletteView.setCallback(this);
-
-        DrawSizeSeekBar=(SeekBar)findViewById(R.id.DrawSizeSeekBar);
-        DrawSizeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                mPaletteView.setPenRawSize(i);
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
 
         mUndoView = findViewById(R.id.undo);
         mRedoView = findViewById(R.id.redo);
@@ -182,9 +170,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }).start();
                 break;
             case R.id.saveasxml:
+                PullPathDrawingInfoParser mPullPathDrawingInfoParser=new PullPathDrawingInfoParser();
+                try {
+                    mPullPathDrawingInfoParser.serialize(mPaletteView.getDrawingList());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 if(mSaveProgressDlg==null){
                     initSaveProgressDlg();
                 }
+                break;
+            case R.id.openfromxml:
+                File file = new File(Environment.getExternalStorageDirectory().getPath(), "handwriting0.xml");
+
+                try {
+                    FileInputStream in=new FileInputStream(file);
+                    List<PathDrawingInfo> mDrawingInfos=new PullPathDrawingInfoParser().parse(in);
+                    mPaletteView.setDrawingList(mDrawingInfos);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+
                 break;
         }
         return true;
@@ -200,20 +207,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.showDrawSizeSeekBar:
-                ColorPopupWindow mPop = new ColorPopupWindow(this);
-                mPop.setOnItemClickListener(this);
-                //这里就可自定义在上方和下方了 ，这种方式是为了确定在某个位置，某个控件的左边，右边，上边，下边都可以
-                //mPop.showAtLocation(v, Gravity.NO_GRAVITY, (location[0] + v.getWidth() / 2) - popupWidth / 2, location[1] - popupHeight);
-                mPop.showAtLocation(v, Gravity.NO_GRAVITY, ( v.getWidth() / 2) , 200);
-
-
-                if (!isDrawSizeSeekBarshowed){
-                    DrawSizeSeekBar.setVisibility(View.VISIBLE);
-                    isDrawSizeSeekBarshowed=true;
-                }else {
-                    DrawSizeSeekBar.setVisibility(View.GONE);
-                    isDrawSizeSeekBarshowed=false;
-                }
+                showSetupPopupWindow(v);
                 break;
             case R.id.undo:
                 mPaletteView.undo();
@@ -237,17 +231,57 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    private void showSetupPopupWindow(View v) {
+        ColorSizePopupWindow mPop = new ColorSizePopupWindow(this);
+        mPop.setDrawSizeSeekBar(mPaletteView.getPenSize());
+        mPop.setOnItemClickListener(this);
+        mPop.setmOnSeekBarChangeListener(this);
+
+        View view = LayoutInflater.from(this).inflate(R.layout.color_size_popupwindow, null);
+        //测量view 注意这里，如果没有测量  ，下面的popupHeight高度为-2  ,因为LinearLayout.LayoutParams.WRAP_CONTENT这句自适应造成的
+        view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        int popupWidth = view.getMeasuredWidth();    //  获取测量后的宽度
+        int popupHeight = view.getMeasuredHeight();  //获取测量后的高度
+        int[] location = new int[2];
+        // 获得位置 这里的v是目标控件，就是你要放在这个v的上面还是下面
+        v.getLocationOnScreen(location);
+        //  mPop.setAnimationStyle(R.style.mypopwindow_anim_style);  //设置动画
+        //这里就可自定义在上方和下方了 ，这种方式是为了确定在某个位置，某个控件的左边，右边，上边，下边都可以
+        mPop.showAtLocation(v, Gravity.TOP, (location[0] + v.getWidth() / 2) - popupWidth / 2, location[1] - popupHeight);
+
+    }
+
     @Override
     public void setOnItemClick(View v) {
 
         switch (v.getId()) {
-            case R.id.comment_item_linear:
-
+            case R.id.colorAccent:
+                mPaletteView.setPenColor(Color.YELLOW);
+//                MyApp.getApp().showToast("lin");
+                break;
+            case R.id.colorRed:
+                mPaletteView.setPenColor(Color.RED);
+//                MyApp.getApp().showToast("lin");
+                break;
+            case R.id.colorGreen:
+                mPaletteView.setPenColor(Color.GREEN);
+//                MyApp.getApp().showToast("lin");
+                break;
+            case R.id.colorBlue:
+                mPaletteView.setPenColor(Color.BLUE);
+//                MyApp.getApp().showToast("lin");
+                break;
+            case R.id.colorBlack:
+                mPaletteView.setPenColor(Color.BLACK);
 //                MyApp.getApp().showToast("lin");
                 break;
 
-
         }
+    }
+
+    @Override
+    public void setOnChanging(SeekBar seekBar, int i, boolean b) {
+        mPaletteView.setPenRawSize(i);
     }
 
 }

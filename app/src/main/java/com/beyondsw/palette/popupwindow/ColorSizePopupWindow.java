@@ -1,4 +1,4 @@
-package com.beyondsw.palette;
+package com.beyondsw.palette.popupwindow;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -7,17 +7,25 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.SeekBar;
 
-public class ColorPopupWindow extends PopupWindow implements View.OnClickListener {
+import com.beyondsw.palette.R;
+
+public class ColorSizePopupWindow extends PopupWindow implements View.OnClickListener ,SeekBar.OnSeekBarChangeListener {
     private View conentView;
     private View colorAccent;
+    private View colorRed;
+    private View colorGreen;
+    private View colorBlue;
+    private View colorBlack;
+    private SeekBar DrawSizeSeekBar;
     View mPopView;
 
     private OnItemClickListener mListener;
+    private OnSeekBarChangeListener mOnSeekBarChangeListener;
 
-    public ColorPopupWindow(final Context context) {
+    public ColorSizePopupWindow(final Context context) {
         super(context);
-
         initView(context);
         setPopupWindow();
         colorAccent.setOnClickListener(this);
@@ -26,15 +34,27 @@ public class ColorPopupWindow extends PopupWindow implements View.OnClickListene
     private void initView(Context context) {
 
         LayoutInflater inflater = LayoutInflater.from(context);
-        mPopView = inflater.inflate(R.layout.popupwindow_color, null);
+        mPopView = inflater.inflate(R.layout.color_size_popupwindow, null);
 
         //comment_item_linear = (LinearLayout) mPopView.findViewById(R.id.comment_item_linear);
         colorAccent = (ImageView) mPopView.findViewById(R.id.colorAccent);
-
+        colorRed = (ImageView) mPopView.findViewById(R.id.colorRed);
+        colorGreen = (ImageView) mPopView.findViewById(R.id.colorGreen);
+        colorBlue = (ImageView) mPopView.findViewById(R.id.colorBlue);
+        colorBlack=(ImageView) mPopView.findViewById(R.id.colorBlack);
+        DrawSizeSeekBar=(SeekBar)mPopView.findViewById(R.id.DrawSizeSeekBar);
+        DrawSizeSeekBar.setOnSeekBarChangeListener(this);
         //comment_item_linear.setOnClickListener(this);
         colorAccent.setOnClickListener(this);
+        colorRed.setOnClickListener(this);
+        colorGreen.setOnClickListener(this);
+        colorBlue.setOnClickListener(this);
+        colorBlack.setOnClickListener(this);
     }
 
+    public void setDrawSizeSeekBar(int sizeSeekBar){
+        DrawSizeSeekBar.setProgress(sizeSeekBar);
+    }
     private void setPopupWindow() {
         this.setContentView(mPopView);// 设置View
         this.setWidth(LinearLayout.LayoutParams.MATCH_PARENT);// 设置弹出窗口的宽
@@ -84,6 +104,23 @@ public class ColorPopupWindow extends PopupWindow implements View.OnClickListene
         }
     }
 
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+        if (mListener != null) {
+            mOnSeekBarChangeListener.setOnChanging(seekBar,i,b);
+        }
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+
+    }
+
 
     /**
      * 定义一个接口，公布出去 在Activity中操作按钮的单击事件
@@ -91,8 +128,16 @@ public class ColorPopupWindow extends PopupWindow implements View.OnClickListene
     public interface OnItemClickListener {
         void setOnItemClick(View v);
     }
-
+    /**
+     * 定义一个接口，公布出去 在Activity中操作按钮的单击事件
+     */
+    public interface OnSeekBarChangeListener {
+        void setOnChanging(SeekBar seekBar, int i, boolean b);
+    }
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.mListener = listener;
+    }
+    public void setmOnSeekBarChangeListener(OnSeekBarChangeListener listener){
+        this.mOnSeekBarChangeListener=listener;
     }
 }

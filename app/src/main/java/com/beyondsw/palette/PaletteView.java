@@ -17,6 +17,8 @@ import android.view.View;
 import com.beyondsw.palette.Utils.DimenUtils;
 import com.beyondsw.palette.drawinginfo.DrawingInfo;
 import com.beyondsw.palette.drawinginfo.PathDrawingInfo;
+import com.beyondsw.palette.shape.BaseShape;
+import com.beyondsw.palette.shape.LineShape;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +36,7 @@ public class PaletteView extends View {
     private float mEndY;
     private Bitmap mBufferBitmap;
     private Canvas mBufferCanvas;
+    private BaseShape mBaseShape;
 
     private static final int MAX_CACHE_STEP = 20;
 
@@ -55,8 +58,15 @@ public class PaletteView extends View {
         ERASER
     }
 
-    private Mode mMode = Mode.DRAW;
+    public enum ShapeMode{
+        LINE,
+        CIRCLE,
+        RECTANGLE,
+        HANDWRITING
+    }
 
+    private Mode mMode = Mode.DRAW;
+    private ShapeMode mShapeMode=ShapeMode.HANDWRITING;
 
     public PaletteView(Context context) {
         super(context);
@@ -73,12 +83,25 @@ public class PaletteView extends View {
         init();
     }
 
+    public List<DrawingInfo> getDrawingList() {
+        return mDrawingList;
+    }
+
     public interface Callback {
         void onUndoRedoStatusChanged();
     }
 
     public void setCallback(Callback callback){
         mCallback = callback;
+    }
+
+    public void setDrawingList(List<PathDrawingInfo> drawingList) {
+        mDrawingList.clear();
+        for (PathDrawingInfo mPathDrawingInfo:drawingList
+             ) {
+            mDrawingList.add(mPathDrawingInfo);
+            mBufferCanvas.drawPath(mPathDrawingInfo.path,mPathDrawingInfo.paint);
+        }
     }
 
     private void init() {
@@ -259,14 +282,12 @@ public class PaletteView extends View {
             canvas.drawBitmap(mBufferBitmap, 0, 0, null);
         }
 
-        //canvas.drawLine(mLastX,mLastY,mEndX,mEndY,mPaint);
+        switch (mShapeMode){
+            case LINE:
+                mBaseShape.draw(canvas,mPaint);
+                break;
+        }
 
-        /*double midpointx=(mLastX+mEndX)*0.5;
-        double midpointy=(mLastY+mEndY)*0.5;
-        double radius=0.5*Math.sqrt(Math.abs(mLastX-mEndX)*Math.abs(mLastX-mEndX)+Math.abs(mLastY-mEndY)*Math.abs(mLastY-mEndY));
-            canvas.drawCircle((float)midpointx , (float)midpointy , (float)radius,mPaint);*/
-
-        canvas.drawRect(mLastX , mLastY , mEndX , mEndY , mPaint);
     }
 
     @SuppressWarnings("all")
@@ -280,6 +301,15 @@ public class PaletteView extends View {
         final float y = event.getY();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
+                switch (mShapeMode){
+                    case LINE:
+                        mLastX = x;
+                        mLastY = y;
+                        mBaseShape=new LineShape();
+                        mBaseShape.setLastX(mLastX);
+                        mBaseShape.setLastY(mLastY);
+                        break;
+                }
                 mLastX = x;
                 mLastY = y;
                 if (mPath == null) {
@@ -288,11 +318,18 @@ public class PaletteView extends View {
                 mPath.moveTo(x,y);
                 break;
             case MotionEvent.ACTION_MOVE:
-                //这里终点设为两点的中心点的目的在于使绘制的曲线更平滑，如果终点直接设置为x,y，效果和lineto是一样的,实际是折线效果
-
+                switch (mShapeMode){
+                    case LINE:
+                        mEndX=x;
+                        mEndY=y;
+                        mBaseShape.setLastX(mEndX);
+                        mBaseShape.setLastY(mEndY);
+                        break;
+                }
                 mEndX=x;
                 mEndY=y;
-                /*mPath.quadTo(mLastX, mLastY, (x + mLastX) / 2, (y + mLastY) / 2);
+                //这里终点设为两点的中心点的目的在于使绘制的曲线更平滑，如果终点直接设置为x,y，效果和lineto是一样的,实际是折线效果
+                mPath.quadTo(mLastX, mLastY, (x + mLastX) / 2, (y + mLastY) / 2);
                 if (mBufferBitmap == null) {
                     initBuffer();
                 }
@@ -302,8 +339,7 @@ public class PaletteView extends View {
                 mBufferCanvas.drawPath(mPath,mPaint);
                 invalidate();
                 mLastX = x;
-                mLastY = y;*/
-                invalidate();
+                mLastY = y;
                 break;
             case MotionEvent.ACTION_UP:
                 if (mMode == Mode.DRAW || mCanEraser) {
