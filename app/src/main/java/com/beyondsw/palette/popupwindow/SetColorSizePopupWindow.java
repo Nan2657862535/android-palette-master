@@ -12,7 +12,7 @@ import android.widget.SeekBar;
 import com.beyondsw.palette.R;
 import com.beyondsw.palette.listener.OnItemClickListener;
 
-public class ColorSizePopupWindow extends PopupWindow implements View.OnClickListener ,SeekBar.OnSeekBarChangeListener {
+public class SetColorSizePopupWindow extends PopupWindow implements View.OnClickListener ,SeekBar.OnSeekBarChangeListener {
     private View conentView;
     private View colorAccent;
     private View colorRed;
@@ -25,7 +25,7 @@ public class ColorSizePopupWindow extends PopupWindow implements View.OnClickLis
     private OnItemClickListener mListener;
     private OnSeekBarChangeListener mOnSeekBarChangeListener;
 
-    public ColorSizePopupWindow(final Context context) {
+    public SetColorSizePopupWindow(final Context context) {
         super(context);
         initView(context);
         setPopupWindow();

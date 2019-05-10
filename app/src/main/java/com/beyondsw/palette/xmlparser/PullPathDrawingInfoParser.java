@@ -10,6 +10,7 @@ import android.graphics.Xfermode;
 import android.os.Environment;
 import android.util.Xml;
 
+import com.beyondsw.palette.drawinginfo.DrawingInfo;
 import com.beyondsw.palette.drawinginfo.Point;
 import com.beyondsw.palette.drawinginfo.PathDrawingInfo;
 import com.beyondsw.palette.shape.BaseShape;
@@ -37,7 +38,7 @@ File xmlFlie = new File(path+fileName);
 InputStream inputStream = new FileInputStream(xmlFlie);
 
 * */
-        List<PathDrawingInfo> mPathDrawingInfos = null;
+        List<DrawingInfo> mDrawingInfos = null;
         List<Point> mPoints=new ArrayList<>();
         PathDrawingInfo mPathDrawingInfo=null;
         // XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
@@ -52,10 +53,17 @@ InputStream inputStream = new FileInputStream(xmlFlie);
         while (eventType != XmlPullParser.END_DOCUMENT) {
             switch (eventType) {
                 case XmlPullParser.START_DOCUMENT:
-                    mPathDrawingInfos = new ArrayList<PathDrawingInfo>();
+                    mDrawingInfos = new ArrayList<DrawingInfo>();
                     break;
                 case XmlPullParser.START_TAG:
-                    if (parser.getName().equals("drawinginfo")) {
+                    String shapeMode=parser.getName();
+                    switch (shapeMode){
+                        case "pathDrawingInfo":
+                            mPathDrawingInfo=new PathDrawingInfo();
+                            break;
+
+                    }
+                    if (parser.getName().equals("pathDrawingInfo")) {
                         mPathDrawingInfo=new PathDrawingInfo();
                     } else if (parser.getName().equals("color")) {
                         eventType = parser.next();

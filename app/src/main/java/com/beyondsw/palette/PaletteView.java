@@ -287,6 +287,7 @@ public class PaletteView extends View {
         info.paint = cachePaint;
         info.mPoints=mPoints;
         mPoints.clear();
+        info.setShapeMode("pathDrawingInfo");
         mDrawingList.add(info);
         mCanEraser = true;
         if (mCallback != null) {
@@ -329,12 +330,15 @@ public class PaletteView extends View {
                 switch (mShapeMode){
                     case LINE:
                         mBaseShape=new LineShape();
+                        mBaseShape.setShapeMode("line");
                         break;
                     case CIRCLE:
                         mBaseShape=new CircleShape();
+                        mBaseShape.setShapeMode("circle");
                         break;
                     case RECTANGLE:
                         mBaseShape=new RectangleShape();
+                        mBaseShape.setShapeMode("rectangle");
                         break;
                     case HANDWRITING:
                         if (mPath == null) {

@@ -11,6 +11,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Xml;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -19,11 +20,15 @@ import android.view.View;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
+import com.beyondsw.palette.drawinginfo.DrawingInfo;
 import com.beyondsw.palette.drawinginfo.PathDrawingInfo;
 import com.beyondsw.palette.listener.OnItemClickListener;
-import com.beyondsw.palette.popupwindow.ColorSizePopupWindow;
-import com.beyondsw.palette.popupwindow.ShapePopupWindow;
+import com.beyondsw.palette.popupwindow.SetColorSizePopupWindow;
+import com.beyondsw.palette.popupwindow.SetShapePopupWindow;
+import com.beyondsw.palette.shape.LineShape;
 import com.beyondsw.palette.xmlparser.PullPathDrawingInfoParser;
+
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,7 +37,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, PaletteView.Callback,Handler.Callback ,OnItemClickListener,ColorSizePopupWindow.OnSeekBarChangeListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, PaletteView.Callback,Handler.Callback ,OnItemClickListener,SetColorSizePopupWindow.OnSeekBarChangeListener {
 
     private View mUndoView;
     private View mRedoView;
@@ -172,18 +177,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }).start();
                 break;
             case R.id.saveasxml:
-                PullPathDrawingInfoParser mPullPathDrawingInfoParser=new PullPathDrawingInfoParser();
+                /*PullPathDrawingInfoParser mPullPathDrawingInfoParser=new PullPathDrawingInfoParser();
                 try {
                     mPullPathDrawingInfoParser.serialize(mPaletteView.getDrawingList());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+*/
+
+                String fileName="handWriting1.xml";
+                File file = new File(Environment.getExternalStorageDirectory().getPath(), fileName);
+                XmlSerializer serializer = Xml.newSerializer(); //由android.util.Xml创建一个XmlSerializer实例
+                // FileOutputStream outS = new FileOutputStream(file,true);
+                //serializer.startDocument("utf-8", true);//文档开头，true表示独立，不需要其他文件依赖
+                StringBuilder mStringBuilder=new StringBuilder();
+                int no=0;
+                for (DrawingInfo mDrawingInfo:mPaletteView.getDrawingList()) {
+                    try {
+                        FileOutputStream outS = new FileOutputStream(file,no==0?false:true);
+                        serializer.setOutput(outS, "utf-8");
+                        mDrawingInfo.serialize(serializer);
+                        outS.close();
+                        no++;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 if(mSaveProgressDlg==null){
                     initSaveProgressDlg();
                 }
                 break;
             case R.id.openfromxml:
-                File file = new File(Environment.getExternalStorageDirectory().getPath(), "handwriting0.xml");
+                fileName="handWriting1.xml";
+                file = new File(Environment.getExternalStorageDirectory().getPath(), fileName);
 
                 try {
                     FileInputStream in=new FileInputStream(file);
@@ -235,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void showShapePopupWindow(View v) {
-        ShapePopupWindow mPop = new ShapePopupWindow(this);
+        SetShapePopupWindow mPop = new SetShapePopupWindow(this);
         mPop.setOnItemClickListener(this);
 
         View view = LayoutInflater.from(this).inflate(R.layout.shape_popupwindow, null);
@@ -253,7 +280,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void showSetupPopupWindow(View v) {
-        ColorSizePopupWindow mPop = new ColorSizePopupWindow(this);
+        SetColorSizePopupWindow mPop = new SetColorSizePopupWindow(this);
         mPop.setDrawSizeSeekBar(mPaletteView.getPenSize());
         mPop.setOnItemClickListener(this);
         mPop.setmOnSeekBarChangeListener(this);

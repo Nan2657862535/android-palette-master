@@ -12,7 +12,7 @@ package com.beyondsw.palette.popupwindow;
         import com.beyondsw.palette.R;
         import com.beyondsw.palette.listener.OnItemClickListener;
 
-public class ShapePopupWindow extends PopupWindow implements View.OnClickListener {
+public class SetShapePopupWindow extends PopupWindow implements View.OnClickListener {
     private View line;
     private View circle;
     private View rectangle;
@@ -21,7 +21,7 @@ public class ShapePopupWindow extends PopupWindow implements View.OnClickListene
 
     private OnItemClickListener mListener;
 
-    public ShapePopupWindow(final Context context) {
+    public SetShapePopupWindow(final Context context) {
         super(context);
         initView(context);
         setPopupWindow();

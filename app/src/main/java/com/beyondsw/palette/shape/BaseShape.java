@@ -5,6 +5,10 @@ import android.graphics.Paint;
 
 import com.beyondsw.palette.drawinginfo.DrawingInfo;
 
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.FileOutputStream;
+
 public class BaseShape extends DrawingInfo{
     protected float mLastX;
     protected float mLastY;
@@ -31,4 +35,10 @@ public class BaseShape extends DrawingInfo{
     public void draw(Canvas canvas) {
 
     }
+
+    @Override
+    public String serialize(XmlSerializer serializer) throws Exception {
+        return null;
+    }
+
 }

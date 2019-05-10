@@ -15,7 +15,7 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.List;
 
-public  class PathDrawingInfo extends  DrawingInfo implements BaseParse {
+public  class PathDrawingInfo extends  DrawingInfo{
 
   public  Path path;
   public List<Point> mPoints;
@@ -25,25 +25,21 @@ public  class PathDrawingInfo extends  DrawingInfo implements BaseParse {
         canvas.drawPath(path, paint);
     }
 
-    @Override
-    public Object parse(InputStream in) throws Exception {
-        return null;
-    }
+
 
     @Override
-    public String serialize() throws Exception {
+    public String serialize(XmlSerializer serializer) throws Exception {
 
-        XmlSerializer serializer = Xml.newSerializer(); //由android.util.Xml创建一个XmlSerializer实例
-        File file = new File(Environment.getExternalStorageDirectory().getPath(), "handwriting0.xml");
-        FileOutputStream outS = new FileOutputStream(file);
-        serializer.setOutput(outS, "utf-8");
-        serializer.startDocument("utf-8", true);//文档开头，true表示独立，不需要其他文件依赖
+        //XmlSerializer serializer = Xml.newSerializer(); //由android.util.Xml创建一个XmlSerializer实例
+        File file = new File(Environment.getExternalStorageDirectory().getPath(), "handwriting1.xml");
+       // FileOutputStream outS = new FileOutputStream(file,true);
+        //serializer.setOutput(outS, "utf-8");
+        //serializer.startDocument("utf-8", true);//文档开头，true表示独立，不需要其他文件依赖
         // serilizer.startTag(null, "smss");//设置节点，第一个是参数是命名空间，第二个是节点名
         StringWriter writer = new StringWriter();
         //serializer.setOutput(writer);   //设置输出方向为writer
-        serializer.startDocument("UTF-8", true);
 
-            serializer.startTag("", "pathdrawinginfo");
+            serializer.startTag("", "pathDrawingInfo");
             // serializer.attribute("", "id", book.getId() + "");
 
             serializer.startTag("", "color");
@@ -70,10 +66,10 @@ public  class PathDrawingInfo extends  DrawingInfo implements BaseParse {
                 num++;
             }
 
-            serializer.endTag("", "pathdrawinginfo");
+            serializer.endTag("", "pathDrawingInfo");
 
         serializer.endDocument();//文档结尾
-        outS.close();
+       // outS.close();
         return null;
     }
 }
