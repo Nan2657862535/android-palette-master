@@ -10,6 +10,7 @@ import android.widget.PopupWindow;
 import android.widget.SeekBar;
 
 import com.beyondsw.palette.R;
+import com.beyondsw.palette.listener.OnItemClickListener;
 
 public class ColorSizePopupWindow extends PopupWindow implements View.OnClickListener ,SeekBar.OnSeekBarChangeListener {
     private View conentView;
@@ -122,12 +123,7 @@ public class ColorSizePopupWindow extends PopupWindow implements View.OnClickLis
     }
 
 
-    /**
-     * 定义一个接口，公布出去 在Activity中操作按钮的单击事件
-     */
-    public interface OnItemClickListener {
-        void setOnItemClick(View v);
-    }
+
     /**
      * 定义一个接口，公布出去 在Activity中操作按钮的单击事件
      */

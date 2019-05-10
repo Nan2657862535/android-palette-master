@@ -18,7 +18,9 @@ import com.beyondsw.palette.Utils.DimenUtils;
 import com.beyondsw.palette.drawinginfo.DrawingInfo;
 import com.beyondsw.palette.drawinginfo.PathDrawingInfo;
 import com.beyondsw.palette.shape.BaseShape;
+import com.beyondsw.palette.shape.CircleShape;
 import com.beyondsw.palette.shape.LineShape;
+import com.beyondsw.palette.shape.RectangleShape;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +69,10 @@ public class PaletteView extends View {
 
     private Mode mMode = Mode.DRAW;
     private ShapeMode mShapeMode=ShapeMode.HANDWRITING;
+
+    public void setShapeMode(ShapeMode shapeMode) {
+        mShapeMode = shapeMode;
+    }
 
     public PaletteView(Context context) {
         super(context);
@@ -278,14 +284,15 @@ public class PaletteView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (mBufferBitmap != null) {
-            canvas.drawBitmap(mBufferBitmap, 0, 0, null);
-        }
-
         switch (mShapeMode){
             case LINE:
-                mBaseShape.draw(canvas,mPaint);
+            case CIRCLE:
+            case RECTANGLE:
+                mBaseShape.draw(mBufferCanvas,mPaint);
                 break;
+        }
+        if (mBufferBitmap != null) {
+            canvas.drawBitmap(mBufferBitmap, 0, 0, null);
         }
 
     }
@@ -301,32 +308,66 @@ public class PaletteView extends View {
         final float y = event.getY();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
+                mLastX = x;
+                mLastY = y;
                 switch (mShapeMode){
                     case LINE:
-                        mLastX = x;
-                        mLastY = y;
                         mBaseShape=new LineShape();
-                        mBaseShape.setLastX(mLastX);
-                        mBaseShape.setLastY(mLastY);
+                        break;
+                    case CIRCLE:
+                        mBaseShape=new CircleShape();
+                        break;
+                    case RECTANGLE:
+                        mBaseShape=new RectangleShape();
+                        break;
+                    case HANDWRITING:
+                        if (mPath == null) {
+                            mPath = new Path();
+                        }
+                        mPath.moveTo(x,y);
                         break;
                 }
-                mLastX = x;
+                //if (mBaseShape==null) break;
+                mBaseShape.setLastX(mLastX);
+                mBaseShape.setLastY(mLastY);
+
+
+               /* mLastX = x;
                 mLastY = y;
                 if (mPath == null) {
                     mPath = new Path();
                 }
-                mPath.moveTo(x,y);
+                mPath.moveTo(x,y);*/
                 break;
             case MotionEvent.ACTION_MOVE:
+                mEndX=x;
+                mEndY=y;
                 switch (mShapeMode){
                     case LINE:
-                        mEndX=x;
-                        mEndY=y;
-                        mBaseShape.setLastX(mEndX);
-                        mBaseShape.setLastY(mEndY);
+                    case RECTANGLE:
+                    case CIRCLE:
+                        mBaseShape.setEndX(mEndX);
+                        mBaseShape.setEndY(mEndY);
+                        break;
+                    case HANDWRITING:
+                        //这里终点设为两点的中心点的目的在于使绘制的曲线更平滑，如果终点直接设置为x,y，效果和lineto是一样的,实际是折线效果
+                        mPath.quadTo(mLastX, mLastY, (x + mLastX) / 2, (y + mLastY) / 2);
+                        if (mBufferBitmap == null) {
+                            initBuffer();
+                        }
+                        if (mMode == Mode.ERASER && !mCanEraser) {
+                            break;
+                        }
+                        mBufferCanvas.drawPath(mPath,mPaint);
+
+                        mLastX = x;
+                        mLastY = y;
                         break;
                 }
-                mEndX=x;
+                invalidate();
+                break;
+
+               /* mEndX=x;
                 mEndY=y;
                 //这里终点设为两点的中心点的目的在于使绘制的曲线更平滑，如果终点直接设置为x,y，效果和lineto是一样的,实际是折线效果
                 mPath.quadTo(mLastX, mLastY, (x + mLastX) / 2, (y + mLastY) / 2);
@@ -340,12 +381,14 @@ public class PaletteView extends View {
                 invalidate();
                 mLastX = x;
                 mLastY = y;
-                break;
+                break;*/
             case MotionEvent.ACTION_UP:
-                if (mMode == Mode.DRAW || mCanEraser) {
-                    saveDrawingPath();
+                if (mShapeMode==ShapeMode.HANDWRITING){
+                    if (mMode == Mode.DRAW || mCanEraser) {
+                        saveDrawingPath();
+                    }
+                    mPath.reset();
                 }
-                mPath.reset();
                 break;
         }
         return true;

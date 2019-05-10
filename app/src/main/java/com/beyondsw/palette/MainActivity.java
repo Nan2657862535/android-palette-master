@@ -20,7 +20,9 @@ import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.beyondsw.palette.drawinginfo.PathDrawingInfo;
+import com.beyondsw.palette.listener.OnItemClickListener;
 import com.beyondsw.palette.popupwindow.ColorSizePopupWindow;
+import com.beyondsw.palette.popupwindow.ShapePopupWindow;
 import com.beyondsw.palette.xmlparser.PullPathDrawingInfoParser;
 
 import java.io.File;
@@ -30,7 +32,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, PaletteView.Callback,Handler.Callback ,ColorSizePopupWindow.OnItemClickListener,ColorSizePopupWindow.OnSeekBarChangeListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, PaletteView.Callback,Handler.Callback ,OnItemClickListener,ColorSizePopupWindow.OnSeekBarChangeListener {
 
     private View mUndoView;
     private View mRedoView;
@@ -233,6 +235,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void showShapePopupWindow(View v) {
+        ShapePopupWindow mPop = new ShapePopupWindow(this);
+        mPop.setOnItemClickListener(this);
+
+        View view = LayoutInflater.from(this).inflate(R.layout.shape_popupwindow, null);
+        //测量view 注意这里，如果没有测量  ，下面的popupHeight高度为-2  ,因为LinearLayout.LayoutParams.WRAP_CONTENT这句自适应造成的
+        view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        int popupWidth = view.getMeasuredWidth();    //  获取测量后的宽度
+        int popupHeight = view.getMeasuredHeight();  //获取测量后的高度
+        int[] location = new int[2];
+        // 获得位置 这里的v是目标控件，就是你要放在这个v的上面还是下面
+        v.getLocationOnScreen(location);
+        //  mPop.setAnimationStyle(R.style.mypopwindow_anim_style);  //设置动画
+        //这里就可自定义在上方和下方了 ，这种方式是为了确定在某个位置，某个控件的左边，右边，上边，下边都可以
+        mPop.showAtLocation(v, Gravity.TOP, (location[0] + v.getWidth() / 2) - popupWidth / 2, location[1] - popupHeight);
 
     }
 
@@ -281,6 +297,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                MyApp.getApp().showToast("lin");
                 break;
 
+            case R.id.line:
+                mPaletteView.setShapeMode(PaletteView.ShapeMode.LINE);
+                break;
+            case R.id.circle:
+                mPaletteView.setShapeMode(PaletteView.ShapeMode.CIRCLE);
+//                MyApp.getApp().showToast("lin");
+                break;
+            case R.id.rectangle:
+                mPaletteView.setShapeMode(PaletteView.ShapeMode.RECTANGLE);
+//                MyApp.getApp().showToast("lin");
+                break;
+            case R.id.pen:
+                mPaletteView.setShapeMode(PaletteView.ShapeMode.HANDWRITING);
+//                MyApp.getApp().showToast("lin");
+                break;
         }
     }
 

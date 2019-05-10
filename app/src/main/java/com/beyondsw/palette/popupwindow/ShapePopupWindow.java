@@ -10,8 +10,9 @@ package com.beyondsw.palette.popupwindow;
         import android.widget.SeekBar;
 
         import com.beyondsw.palette.R;
+        import com.beyondsw.palette.listener.OnItemClickListener;
 
-public class shapepopupwindow extends PopupWindow implements View.OnClickListener ,SeekBar.OnSeekBarChangeListener {
+public class ShapePopupWindow extends PopupWindow implements View.OnClickListener {
     private View line;
     private View circle;
     private View rectangle;
@@ -19,9 +20,8 @@ public class shapepopupwindow extends PopupWindow implements View.OnClickListene
     View mPopView;
 
     private OnItemClickListener mListener;
-    private OnSeekBarChangeListener mOnSeekBarChangeListener;
 
-    public shapepopupwindow(final Context context) {
+    public ShapePopupWindow(final Context context) {
         super(context);
         initView(context);
         setPopupWindow();
@@ -93,40 +93,9 @@ public class shapepopupwindow extends PopupWindow implements View.OnClickListene
         }
     }
 
-    @Override
-    public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-        if (mListener != null) {
-            mOnSeekBarChangeListener.setOnChanging(seekBar,i,b);
-        }
-    }
-
-    @Override
-    public void onStartTrackingTouch(SeekBar seekBar) {
-
-    }
-
-    @Override
-    public void onStopTrackingTouch(SeekBar seekBar) {
-
-    }
 
 
-    /**
-     * 定义一个接口，公布出去 在Activity中操作按钮的单击事件
-     */
-    public interface OnItemClickListener {
-        void setOnItemClick(View v);
-    }
-    /**
-     * 定义一个接口，公布出去 在Activity中操作按钮的单击事件
-     */
-    public interface OnSeekBarChangeListener {
-        void setOnChanging(SeekBar seekBar, int i, boolean b);
-    }
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.mListener = listener;
-    }
-    public void setmOnSeekBarChangeListener(OnSeekBarChangeListener listener){
-        this.mOnSeekBarChangeListener=listener;
     }
 }
