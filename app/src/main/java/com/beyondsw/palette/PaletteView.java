@@ -106,13 +106,10 @@ public class PaletteView extends View {
         mCallback = callback;
     }
 
-    public void setDrawingList(List<PathDrawingInfo> drawingList) {
+    public void setDrawingList(List<DrawingInfo> drawingList) {
         mDrawingList.clear();
-        for (PathDrawingInfo mPathDrawingInfo:drawingList
-             ) {
-            mDrawingList.add(mPathDrawingInfo);
-            mBufferCanvas.drawPath(mPathDrawingInfo.path,mPathDrawingInfo.paint);
-        }
+       mDrawingList=drawingList;
+        reDraw();
     }
 
     private void init() {

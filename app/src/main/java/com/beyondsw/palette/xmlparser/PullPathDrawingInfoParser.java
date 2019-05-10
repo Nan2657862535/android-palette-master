@@ -14,6 +14,9 @@ import com.beyondsw.palette.drawinginfo.DrawingInfo;
 import com.beyondsw.palette.drawinginfo.Point;
 import com.beyondsw.palette.drawinginfo.PathDrawingInfo;
 import com.beyondsw.palette.shape.BaseShape;
+import com.beyondsw.palette.shape.CircleShape;
+import com.beyondsw.palette.shape.LineShape;
+import com.beyondsw.palette.shape.RectangleShape;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
@@ -30,7 +33,7 @@ public class PullPathDrawingInfoParser implements BaseParse{
    *    ---- 解析xml
     */
    @Override
-    public List<PathDrawingInfo> parse(InputStream in) throws Exception {
+    public List<DrawingInfo> parse(InputStream in) throws Exception {
 /*
 * // path路径根据实际项目修改，此次获取SDcard根目录
 String path = Environment.getExternalStorageDirectory().toString();
@@ -49,7 +52,9 @@ InputStream inputStream = new FileInputStream(xmlFlie);
         List<Point> mPointList=new ArrayList<>();
         float x = 0,y=0;
        Path mPath;
-       Paint mPaint;
+       Paint mPaint = new Paint();
+       BaseShape mBaseShape = new BaseShape();
+       float mLastX = 0,mLastY = 0,mEndX = 0,mEndY = 0;
         while (eventType != XmlPullParser.END_DOCUMENT) {
             switch (eventType) {
                 case XmlPullParser.START_DOCUMENT:
@@ -60,41 +65,68 @@ InputStream inputStream = new FileInputStream(xmlFlie);
                     switch (shapeMode){
                         case "pathDrawingInfo":
                             mPathDrawingInfo=new PathDrawingInfo();
+                            mPathDrawingInfo.setShapeMode("");
                             break;
-
+                        case "line":
+                            mBaseShape=new LineShape();
+                            mBaseShape.setShapeMode("line");
+                        case "circle":
+                            mBaseShape=new CircleShape();
+                            mBaseShape.setShapeMode("circle");
+                        case "rectangle":
+                            mBaseShape=new RectangleShape();
+                            mBaseShape.setShapeMode("rectangle");
+                            break;
                     }
-                    if (parser.getName().equals("pathDrawingInfo")) {
-                        mPathDrawingInfo=new PathDrawingInfo();
-                    } else if (parser.getName().equals("color")) {
+                    if (parser.getName().equals("color")) {
                         eventType = parser.next();
-                        mPathDrawingInfo.paint.setColor(Integer.parseInt(parser.getText()));
+                        mPaint.setColor(Integer.parseInt(parser.getText()));
                     } else if (parser.getName().equals("DrawSize")){
-                        mPathDrawingInfo.paint.setStrokeWidth(Float.parseFloat(parser.getText()));
+                        mPaint.setStrokeWidth(Float.parseFloat(parser.getText()));
                     }else if (parser.getName().equals("Xfermode")){
                         //mPathDrawingInfo.paint.setXfermode((Xfermode)parser.getText());
                     }else if (parser.getName().contains("pointx")){
                         x=Float.parseFloat(parser.getText());
-
                     } else if (parser.getName().contains("pointy")){
                         y=Float.parseFloat(parser.getText());
                         mPointList.add(new Point(x,y));
+                    }else if (parser.getName().equals("mLastX")){
+                        mLastX=Float.parseFloat(parser.getText());
+                    }else if (parser.getName().equals("mLastY")){
+                        mLastY=Float.parseFloat(parser.getText());
+                    }else if (parser.getName().equals("mEndX")){
+                        mEndX=Float.parseFloat(parser.getText());
+                    }else if (parser.getName().equals("mEndY")){
+                        mEndY=Float.parseFloat(parser.getText());
                     }
                     break;
                 case XmlPullParser.END_TAG:
-                    if (parser.getName().equals("drawinginfo")) {
-                        if (mPointList.size()!=0){
+                    shapeMode=parser.getName();
+                    switch (shapeMode){
+                        case "pathDrawingInfo":
+                            mPathDrawingInfo.paint=mPaint;
+                            mPathDrawingInfo.mPoints=mPointList;
                             mPath=pointsToPath(mPointList);
                             mPathDrawingInfo.path=mPath;
-                            mPathDrawingInfos.add(mPathDrawingInfo);
-                            mPointList.clear();
-                        }
-                        mPathDrawingInfo = null;
+                            mDrawingInfos.add(mPathDrawingInfo);
+                            break;
+                        case "line":
+                        case "circle":
+                        case "rectangle":
+                            mBaseShape.paint=mPaint;
+                            mBaseShape.setLastX(mLastX);
+                            mBaseShape.setLastY(mLastY);
+                            mBaseShape.setEndX(mEndX);
+                            mBaseShape.setEndY(mEndY);
+                            mDrawingInfos.add(mBaseShape);
+                            break;
                     }
+
                     break;
             }
             eventType = parser.next();
         }
-        return mPathDrawingInfos;
+        return mDrawingInfos;
     }
 
     @Override

@@ -214,7 +214,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 try {
                     FileInputStream in=new FileInputStream(file);
-                    List<PathDrawingInfo> mDrawingInfos=new PullPathDrawingInfoParser().parse(in);
+                    List<DrawingInfo> mDrawingInfos=new PullPathDrawingInfoParser().parse(in);
+                    Toast.makeText(this, mDrawingInfos.size()+"", Toast.LENGTH_SHORT).show();
                     mPaletteView.setDrawingList(mDrawingInfos);
                 } catch (Exception e) {
                     e.printStackTrace();
