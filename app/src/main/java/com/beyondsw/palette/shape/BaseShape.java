@@ -3,12 +3,13 @@ package com.beyondsw.palette.shape;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
-public abstract class BaseShape {
+import com.beyondsw.palette.drawinginfo.DrawingInfo;
+
+public class BaseShape extends DrawingInfo{
     protected float mLastX;
     protected float mLastY;
     protected float mEndX;
     protected float mEndY;
-    public abstract void draw(Canvas canvas, Paint mPaint);
 
     public void setLastX(float lastX) {
         mLastX = lastX;
@@ -24,5 +25,10 @@ public abstract class BaseShape {
 
     public void setEndY(float endY) {
         mEndY = endY;
+    }
+
+    @Override
+    public void draw(Canvas canvas) {
+
     }
 }

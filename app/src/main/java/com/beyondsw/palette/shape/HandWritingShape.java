@@ -28,10 +28,7 @@ public class HandWritingShape extends BaseShape {
         DRAW,
         ERASER
     }
-    @Override
-    public void draw(Canvas canvas, Paint mPaint) {
 
-    }
     public HandWritingShape(){
         if (mPath == null) {
             mPath = new Path();

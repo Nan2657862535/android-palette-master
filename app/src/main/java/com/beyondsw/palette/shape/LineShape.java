@@ -5,7 +5,7 @@ import android.graphics.Paint;
 
 public class LineShape extends BaseShape {
     @Override
-    public void draw(Canvas canvas, Paint mPaint) {
-        canvas.drawLine(mLastX,mLastY,mEndX,mEndY,mPaint);
+    public void draw(Canvas canvas) {
+        canvas.drawLine(mLastX,mLastY,mEndX,mEndY,paint);
     }
 }

@@ -269,6 +269,12 @@ public class PaletteView extends View {
         } else if (mDrawingList.size() == MAX_CACHE_STEP) {
             mDrawingList.remove(0);
         }
+        if (mShapeMode!=ShapeMode.HANDWRITING){
+            mBaseShape.draw(mBufferCanvas);
+            mDrawingList.add(mBaseShape);
+            return;
+        }
+
         Path cachePath = new Path(mPath);
         Paint cachePaint = new Paint(mPaint);
         PathDrawingInfo info = new PathDrawingInfo();
@@ -288,9 +294,11 @@ public class PaletteView extends View {
             case LINE:
             case CIRCLE:
             case RECTANGLE:
-                mBaseShape.draw(mBufferCanvas,mPaint);
+                mBaseShape.paint=mPaint;
+                mBaseShape.draw(canvas);
                 break;
         }
+
         if (mBufferBitmap != null) {
             canvas.drawBitmap(mBufferBitmap, 0, 0, null);
         }
@@ -342,6 +350,9 @@ public class PaletteView extends View {
             case MotionEvent.ACTION_MOVE:
                 mEndX=x;
                 mEndY=y;
+                if (mBufferBitmap == null) {
+                    initBuffer();
+                }
                 switch (mShapeMode){
                     case LINE:
                     case RECTANGLE:
@@ -352,9 +363,7 @@ public class PaletteView extends View {
                     case HANDWRITING:
                         //这里终点设为两点的中心点的目的在于使绘制的曲线更平滑，如果终点直接设置为x,y，效果和lineto是一样的,实际是折线效果
                         mPath.quadTo(mLastX, mLastY, (x + mLastX) / 2, (y + mLastY) / 2);
-                        if (mBufferBitmap == null) {
-                            initBuffer();
-                        }
+
                         if (mMode == Mode.ERASER && !mCanEraser) {
                             break;
                         }
@@ -383,12 +392,13 @@ public class PaletteView extends View {
                 mLastY = y;
                 break;*/
             case MotionEvent.ACTION_UP:
-                if (mShapeMode==ShapeMode.HANDWRITING){
+                mBaseShape.setEndX(mEndX);
+                mBaseShape.setEndY(mEndY);
                     if (mMode == Mode.DRAW || mCanEraser) {
                         saveDrawingPath();
                     }
-                    mPath.reset();
-                }
+                    if (mShapeMode==ShapeMode.HANDWRITING)
+                        mPath.reset();
                 break;
         }
         return true;
