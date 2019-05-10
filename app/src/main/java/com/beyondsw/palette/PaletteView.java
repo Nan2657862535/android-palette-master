@@ -6,7 +6,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Xfermode;
@@ -22,6 +21,7 @@ import android.view.WindowManager;
 import com.beyondsw.palette.Utils.DimenUtils;
 import com.beyondsw.palette.drawinginfo.DrawingInfo;
 import com.beyondsw.palette.drawinginfo.PathDrawingInfo;
+import com.beyondsw.palette.drawinginfo.Point;
 import com.beyondsw.palette.shape.BaseShape;
 import com.beyondsw.palette.shape.CircleShape;
 import com.beyondsw.palette.shape.LineShape;
@@ -285,6 +285,8 @@ public class PaletteView extends View {
         PathDrawingInfo info = new PathDrawingInfo();
         info.path = cachePath;
         info.paint = cachePaint;
+        info.mPoints=mPoints;
+        mPoints.clear();
         mDrawingList.add(info);
         mCanEraser = true;
         if (mCallback != null) {
@@ -310,6 +312,7 @@ public class PaletteView extends View {
 
     }
 
+    private List<Point> mPoints=new ArrayList<>();
     @SuppressWarnings("all")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -338,6 +341,7 @@ public class PaletteView extends View {
                             mPath = new Path();
                         }
                         mPath.moveTo(x,y);
+                        mPoints.add(new Point(x,y));
                         break;
                 }
                 //if (mBaseShape==null) break;
@@ -370,7 +374,7 @@ public class PaletteView extends View {
                     case HANDWRITING:
                         //这里终点设为两点的中心点的目的在于使绘制的曲线更平滑，如果终点直接设置为x,y，效果和lineto是一样的,实际是折线效果
                         mPath.quadTo(mLastX, mLastY, (x + mLastX) / 2, (y + mLastY) / 2);
-
+                        mPoints.add(new Point(x,y));
                         if (mMode == Mode.ERASER && !mCanEraser) {
                             break;
                         }

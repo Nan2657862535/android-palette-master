@@ -24,7 +24,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PullPathDrawingInfoParser extends BaseParse{
+public class PullPathDrawingInfoParser implements BaseParse{
    /*
    *    ---- 解析xml
     */
@@ -89,6 +89,11 @@ InputStream inputStream = new FileInputStream(xmlFlie);
         return mPathDrawingInfos;
     }
 
+    @Override
+    public String serialize() throws Exception {
+        return null;
+    }
+
     private Path pointsToPath(List<Point> pointList) {
        Path mPath=new Path();
        float mLastX=pointList.get(0).x;
@@ -108,7 +113,7 @@ InputStream inputStream = new FileInputStream(xmlFlie);
      *   ---- 生成xml
      */
 
-    @Override
+
     public String serialize(Object mDrawingListObject) throws Exception {
 //      XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
 //      XmlSerializer serializer = factory.newSerializer();
