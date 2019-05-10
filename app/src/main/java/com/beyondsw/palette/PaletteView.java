@@ -6,13 +6,18 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Xfermode;
+import android.os.Build;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 
 import com.beyondsw.palette.Utils.DimenUtils;
 import com.beyondsw.palette.drawinginfo.DrawingInfo;
@@ -336,8 +341,10 @@ public class PaletteView extends View {
                         break;
                 }
                 //if (mBaseShape==null) break;
-                mBaseShape.setLastX(mLastX);
-                mBaseShape.setLastY(mLastY);
+                if (mShapeMode!=ShapeMode.HANDWRITING){
+                    mBaseShape.setLastX(mLastX);
+                    mBaseShape.setLastY(mLastY);
+                }
 
 
                /* mLastX = x;
@@ -392,8 +399,10 @@ public class PaletteView extends View {
                 mLastY = y;
                 break;*/
             case MotionEvent.ACTION_UP:
-                mBaseShape.setEndX(mEndX);
-                mBaseShape.setEndY(mEndY);
+                if (mShapeMode!=ShapeMode.HANDWRITING){
+                    mBaseShape.setEndX(mEndX);
+                    mBaseShape.setEndY(mEndY);
+                }
                     if (mMode == Mode.DRAW || mCanEraser) {
                         saveDrawingPath();
                     }
